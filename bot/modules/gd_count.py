@@ -7,7 +7,7 @@ from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
 from bot.helper.telegram_helper.message_utils import deleteMessage, sendMessage
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
-from bot.helper.ext_utils.bot_utils import is_gdrive_link, sync_to_async, new_task, get_readable_file_size
+from bot.helper.ext_utils.bot_utils import is_gdrive_link, sync_to_async, new_task
 
 
 @new_task
@@ -31,22 +31,13 @@ async def countNode(client, message):
     if is_gdrive_link(link):
         msg = await sendMessage(message, f"Counting: <code>{link}</code>")
         gd = GoogleDriveHelper()
-        name, mime_type, size, files, folders = await sync_to_async(gd.count, link)
-        if mime_type is None:
-            await sendMessage(message, name)
-            return
+        result = await sync_to_async(gd.count, link)
         await deleteMessage(msg)
-        msg = f'<b>Name: </b><code>{name}</code>'
-        msg += f'\n\n<b>Size: </b>{get_readable_file_size(size)}'
-        msg += f'\n\n<b>Type: </b>{mime_type}'
-        if mime_type == 'Folder':
-            msg += f'\n<b>SubFolders: </b>{folders}'
-            msg += f'\n<b>Files: </b>{files}'
-        msg += f'\n\n<b>cc: </b>{tag}'
+        cc = f'\n\n<b>cc: </b>{tag}'
+        await sendMessage(message, result + cc)
     else:
         msg = 'Send Gdrive link along with command or by replying to the link by command'
-
-    await sendMessage(message, msg)
+        await sendMessage(message, msg)
 
 
 bot.add_handler(MessageHandler(countNode, filters=command(

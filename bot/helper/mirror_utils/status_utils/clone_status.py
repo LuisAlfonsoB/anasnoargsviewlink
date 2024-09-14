@@ -2,24 +2,21 @@
 from bot.helper.ext_utils.bot_utils import MirrorStatus, get_readable_file_size, get_readable_time
 
 
-class GdriveStatus:
-    def __init__(self, obj, size, message, gid, status):
+class CloneStatus:
+    def __init__(self, obj, size, message, gid):
         self.__obj = obj
         self.__size = size
         self.__gid = gid
-        self.__status = status
         self.message = message
 
     def processed_bytes(self):
-        return get_readable_file_size(self.__obj.processed_bytes)
+        return get_readable_file_size(self.__obj.transferred_size)
 
     def size(self):
         return get_readable_file_size(self.__size)
 
     def status(self):
-        if self.__status == 'up':
-            return MirrorStatus.STATUS_UPLOADING
-        return MirrorStatus.STATUS_DOWNLOADING
+        return MirrorStatus.STATUS_CLONING
 
     def name(self):
         return self.__obj.name
@@ -29,7 +26,7 @@ class GdriveStatus:
 
     def progress_raw(self):
         try:
-            return self.__obj.processed_bytes / self.__size * 100
+            return self.__obj.transferred_size / self.__size * 100
         except:
             return 0
 
@@ -37,12 +34,12 @@ class GdriveStatus:
         return f'{round(self.progress_raw(), 2)}%'
 
     def speed(self):
-        return f'{get_readable_file_size(self.__obj.speed())}/s'
+        return f'{get_readable_file_size(self.__obj.cspeed())}/s'
 
     def eta(self):
         try:
-            seconds = (self.__size - self.__obj.processed_bytes) / \
-                self.__obj.speed()
+            seconds = (self.__size - self.__obj.transferred_size) / \
+                self.__obj.cspeed()
             return f'{get_readable_time(seconds)}'
         except:
             return '-'

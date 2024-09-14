@@ -102,10 +102,14 @@ async def load_config():
                 x = x.lstrip('.')
             GLOBAL_EXTENSION_FILTER.append(x.strip().lower())
 
-    MEGA_EMAIL = environ.get('MEGA_EMAIL', '')
+    MEGA_API_KEY = environ.get('MEGA_API_KEY', '')
+    if len(MEGA_API_KEY) == 0:
+        MEGA_API_KEY = ''
+
+    MEGA_EMAIL_ID = environ.get('MEGA_EMAIL_ID', '')
     MEGA_PASSWORD = environ.get('MEGA_PASSWORD', '')
-    if len(MEGA_EMAIL) == 0 or len(MEGA_PASSWORD) == 0:
-        MEGA_EMAIL = ''
+    if len(MEGA_EMAIL_ID) == 0 or len(MEGA_PASSWORD) == 0:
+        MEGA_EMAIL_ID = ''
         MEGA_PASSWORD = ''
 
     UPTOBOX_TOKEN = environ.get('UPTOBOX_TOKEN', '')
@@ -156,15 +160,15 @@ async def load_config():
     else:
         AUTO_DELETE_MESSAGE_DURATION = int(AUTO_DELETE_MESSAGE_DURATION)
 
-    YT_DLP_OPTIONS = environ.get('YT_DLP_OPTIONS', '')
-    if len(YT_DLP_OPTIONS) == 0:
-        YT_DLP_OPTIONS = ''
+    YT_DLP_QUALITY = environ.get('YT_DLP_QUALITY', '')
+    if len(YT_DLP_QUALITY) == 0:
+        YT_DLP_QUALITY = ''
 
     SEARCH_LIMIT = environ.get('SEARCH_LIMIT', '')
     SEARCH_LIMIT = 0 if len(SEARCH_LIMIT) == 0 else int(SEARCH_LIMIT)
 
-    DUMP_CHAT_ID = environ.get('DUMP_CHAT_ID', '')
-    DUMP_CHAT_ID = '' if len(DUMP_CHAT_ID) == 0 else int(DUMP_CHAT_ID)
+    DUMP_CHAT = environ.get('DUMP_CHAT', '')
+    DUMP_CHAT = '' if len(DUMP_CHAT) == 0 else int(DUMP_CHAT)
 
     STATUS_LIMIT = environ.get('STATUS_LIMIT', '')
     STATUS_LIMIT = 10 if len(STATUS_LIMIT) == 0 else int(STATUS_LIMIT)
@@ -307,7 +311,7 @@ async def load_config():
                         'DATABASE_URL': DATABASE_URL,
                         'DEFAULT_UPLOAD': DEFAULT_UPLOAD,
                         'DOWNLOAD_DIR': DOWNLOAD_DIR,
-                        'DUMP_CHAT_ID': DUMP_CHAT_ID,
+                        'DUMP_CHAT': DUMP_CHAT,
                         'EQUAL_SPLITS': EQUAL_SPLITS,
                         'EXTENSION_FILTER': EXTENSION_FILTER,
                         'GDRIVE_ID': GDRIVE_ID,
@@ -317,7 +321,8 @@ async def load_config():
                         'LEECH_FILENAME_PREFIX': LEECH_FILENAME_PREFIX,
                         'LEECH_SPLIT_SIZE': LEECH_SPLIT_SIZE,
                         'MEDIA_GROUP': MEDIA_GROUP,
-                        'MEGA_EMAIL': MEGA_EMAIL,
+                        'MEGA_API_KEY': MEGA_API_KEY,
+                        'MEGA_EMAIL_ID': MEGA_EMAIL_ID,
                         'MEGA_PASSWORD': MEGA_PASSWORD,
                         'OWNER_ID': OWNER_ID,
                         'QUEUE_ALL': QUEUE_ALL,
@@ -348,7 +353,7 @@ async def load_config():
                         'USE_SERVICE_ACCOUNTS': USE_SERVICE_ACCOUNTS,
                         'VIEW_LINK': VIEW_LINK,
                         'WEB_PINCODE': WEB_PINCODE,
-                        'YT_DLP_OPTIONS': YT_DLP_OPTIONS})
+                        'YT_DLP_QUALITY': YT_DLP_QUALITY})
 
     if DATABASE_URL:
         await DbManger().update_config(config_dict)
@@ -462,7 +467,7 @@ async def edit_variable(client, message, pre_message, key):
     elif key == 'DOWNLOAD_DIR':
         if not value.endswith('/'):
             value += '/'
-    elif key in ['DUMP_CHAT_ID', 'RSS_CHAT_ID']:
+    elif key in ['DUMP_CHAT', 'RSS_CHAT_ID']:
         value = int(value)
     elif key == 'STATUS_UPDATE_INTERVAL':
         value = int(value)
@@ -806,7 +811,7 @@ async def edit_bot_settings(client, query):
         await event_handler(client, query, pfunc, rfunc)
     elif data[1] == 'editaria' and STATE == 'view':
         value = aria2_options[data[2]]
-        if len(str(value)) > 200:
+        if len(value) > 200:
             await query.answer()
             with BytesIO(str.encode(value)) as out_file:
                 out_file.name = f"{data[2]}.txt"

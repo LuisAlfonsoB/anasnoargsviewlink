@@ -21,17 +21,12 @@ async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_
         a2c_opt['seed-time'] = seed_time
     if TORRENT_TIMEOUT := config_dict['TORRENT_TIMEOUT']:
         a2c_opt['bt-stop-timeout'] = f'{TORRENT_TIMEOUT}'
-    try:
-        download = (await sync_to_async(aria2.add, link, a2c_opt))[0]
-    except Exception as e:
-        LOGGER.info(f"Aria2c Download Error: {e}")
-        await sendMessage(listener.message, f'{e}')
-        return
+    download = (await sync_to_async(aria2.add, link, a2c_opt))[0]
     if await aiopath.exists(link):
         await aioremove(link)
     if download.error_message:
         error = str(download.error_message).replace('<', ' ').replace('>', ' ')
-        LOGGER.info(f"Aria2c Download Error: {error}")
+        LOGGER.info(f"Download Error: {error}")
         await sendMessage(listener.message, error)
         return
     gid = download.gid
