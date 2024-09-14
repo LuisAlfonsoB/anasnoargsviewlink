@@ -1,4 +1,4 @@
-FROM elricariocco/mltb:latest
+FROM elricariocco/anasrcapril:latest
 
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app
